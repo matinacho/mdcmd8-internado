@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDCMD8 · Biblioteca Internado Urgencia UA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: #e2e0d8;
+  --border2: #cccab8;
+  --text: #1a1916;
+  --text2: #6b6860;
+  --text3: #9e9c96;
+  --accent: #1a4f8a;
+  --accent-light: #e8f0fb;
+  --accent-text: #0d3463;
+  --green: #1a6b3c;
+  --green-light: #e8f5ed;
+  --red: #8a1a1a;
+  --red-light: #fbe8e8;
+  --amber: #7a5000;
+  --amber-light: #fdf3e3;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font-family:'DM Sans',sans-serif;cursor:pointer}
+
+/* ── LAYOUT ── */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
+.main{flex:1;display:flex;flex-direction:column;min-height:100vh;max-width:calc(100vw - 260px)}
+@media(max-width:700px){
+  .layout{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:relative;border-right:none;border-bottom:1px solid var(--border)}
+  .main{max-width:100vw}
+}
+
+/* ── SIDEBAR ── */
+.sidebar-brand{padding:20px 18px 14px;border-bottom:1px solid var(--border)}
+.brand-badge{display:inline-block;background:var(--accent);color:#fff;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;letter-spacing:.5px;margin-bottom:8px}
+.brand-title{font-size:15px;font-weight:600;color:var(--text);line-height:1.3}
+.brand-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.sidebar-search{padding:10px 14px;border-bottom:1px solid var(--border)}
+.sidebar-search input{width:100%;padding:7px 10px 7px 32px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--bg);color:var(--text);outline:none;position:relative}
+.sidebar-search input:focus{border-color:var(--accent)}
+.search-wrap{position:relative}
+.search-wrap .ti{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0 12px}
+.nav-group-label{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);padding:14px 18px 5px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 18px;font-size:13px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .15s;user-select:none}
+.nav-item:hover{background:var(--bg);color:var(--text)}
+.nav-item.active{background:var(--accent-light);color:var(--accent-text);border-left-color:var(--accent);font-weight:500}
+.nav-item i{font-size:16px;flex-shrink:0}
+.nav-count{margin-left:auto;font-size:10px;background:var(--surface2);color:var(--text3);padding:1px 7px;border-radius:20px;min-width:20px;text-align:center}
+.nav-item.active .nav-count{background:var(--accent);color:#fff}
+.week-group-toggle{display:flex;align-items:center;gap:8px;padding:7px 18px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;width:100%;background:none;border:none;text-transform:uppercase;letter-spacing:.5px}
+.week-group-toggle:hover{color:var(--text2)}
+.week-group-toggle .chevron{margin-left:auto;font-size:13px;transition:transform .2s}
+.week-group-toggle.open .chevron{transform:rotate(180deg)}
+.week-children{overflow:hidden}
+.week-child{display:flex;align-items:center;gap:8px;padding:5px 18px 5px 28px;font-size:12px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .12s}
+.week-child:hover{background:var(--bg);color:var(--text)}
+.week-child.active{background:var(--accent-light);color:var(--accent-text);border-left-color:var(--accent);font-weight:500}
+.week-child i{font-size:14px;flex-shrink:0}
+.week-count{margin-left:auto;font-size:10px;color:var(--text3)}
+.sidebar-footer{padding:10px 14px;border-top:1px solid var(--border)}
+.admin-badge{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--amber-light);border-radius:var(--radius-sm);font-size:12px;color:var(--amber)}
+.visitor-badge{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--green-light);border-radius:var(--radius-sm);font-size:12px;color:var(--green)}
+.badge-btn{margin-left:auto;font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer}
+
+/* ── TOPBAR ── */
+.topbar{padding:16px 24px 14px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar-title{font-size:17px;font-weight:600;flex:1;min-width:0}
+.topbar-sub{font-size:12px;color:var(--text3);font-weight:400;margin-left:6px}
+.topbar-actions{display:flex;gap:8px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--surface2);border-color:var(--border2)}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:var(--accent-text)}
+.btn.danger{background:var(--red-light);color:var(--red);border-color:#f5c4c4}
+.btn.success{background:var(--green-light);color:var(--green);border-color:#b8dfc8}
+.btn i{font-size:16px}
+
+/* ── CONTENT ── */
+.content{flex:1;padding:20px 24px;max-width:900px}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.stat-num{font-size:26px;font-weight:600;color:var(--text);line-height:1}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* ── DRIVE BANNER ── */
+.drive-banner{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:20px;cursor:pointer;transition:border-color .15s}
+.drive-banner:hover{border-color:var(--accent)}
+.drive-icon{width:38px;height:38px;border-radius:8px;background:#e8f0fb;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.drive-icon i{font-size:20px;color:var(--accent)}
+.drive-title{font-size:13px;font-weight:500}
+.drive-url{font-size:12px;color:var(--text3);margin-top:1px;word-break:break-all}
+
+/* ── SECTIONS ── */
+.section-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow)}
+.section-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:background .12s}
+.section-header:hover{background:var(--bg)}
+.section-handle{color:var(--text3);font-size:15px;cursor:grab;flex-shrink:0}
+.section-handle:active{cursor:grabbing}
+.section-icon{font-size:16px;color:var(--accent);flex-shrink:0}
+.section-name{font-size:13px;font-weight:600;flex:1}
+.section-meta{font-size:11px;color:var(--text3)}
+.section-admin-actions{display:flex;gap:4px;flex-shrink:0}
+.section-chevron{font-size:13px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.section-chevron.open{transform:rotate(180deg)}
+.section-body{border-top:1px solid var(--border)}
+
+/* ── RESOURCES ── */
+.resource-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border);transition:background .1s}
+.resource-row:last-child{border-bottom:none}
+.resource-row:hover{background:var(--bg)}
+.res-handle{color:var(--text3);font-size:14px;cursor:grab;flex-shrink:0}
+.res-handle:active{cursor:grabbing}
+.res-type-icon{font-size:18px;flex-shrink:0}
+.res-info{flex:1;min-width:0}
+.res-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-desc{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;font-family:'DM Mono',monospace;letter-spacing:.3px}
+.tag-pdf{background:#fbe8e8;color:#8a1a1a}
+.tag-ppt{background:#fdf3e3;color:#7a5000}
+.tag-link{background:#e8f0fb;color:#0d3463}
+.tag-video{background:#f5e8fb;color:#4a1a7a}
+.tag-doc{background:#e8f5ed;color:#1a6b3c}
+.tag-otro{background:var(--surface2);color:var(--text2)}
+.res-actions{display:flex;gap:4px;flex-shrink:0}
+.icon-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);border:none;background:transparent;cursor:pointer;color:var(--text3);font-size:15px;transition:all .12s}
+.icon-btn:hover{background:var(--surface2);color:var(--text)}
+.icon-btn.red:hover{background:var(--red-light);color:var(--red)}
+.icon-btn.blue:hover{background:var(--accent-light);color:var(--accent)}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state i{font-size:36px;display:block;margin-bottom:10px;opacity:.5}
+.empty-state p{font-size:13px}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal{background:var(--surface);border-radius:var(--radius);width:100%;max-width:460px;box-shadow:var(--shadow-md);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.modal-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;flex-shrink:0}
+.modal-header h3{font-size:15px;font-weight:600;flex:1}
+.modal-body{padding:18px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.modal-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:12px;font-weight:500;color:var(--text2)}
+.form-group input,.form-group select,.form-group textarea{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text);background:var(--bg);font-family:'DM Sans',sans-serif;outline:none;width:100%;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-hint{font-size:11px;color:var(--text3);line-height:1.5}
+.tab-strip{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.tab-btn{flex:1;padding:7px;font-size:12px;font-weight:500;border:none;background:var(--bg);color:var(--text2);cursor:pointer;transition:all .15s;border-right:1px solid var(--border)}
+.tab-btn:last-child{border-right:none}
+.tab-btn.active{background:var(--accent);color:#fff}
+.info-box{background:var(--accent-light);border:1px solid #c5d9f5;border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--accent-text);display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.info-box i{font-size:16px;flex-shrink:0;margin-top:1px}
+
+/* ── LOGIN ── */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;width:340px;box-shadow:var(--shadow-md)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo .badge{display:inline-block;background:var(--accent);color:#fff;font-family:'DM Mono',monospace;font-size:12px;padding:4px 12px;border-radius:6px;letter-spacing:.5px;margin-bottom:10px}
+.login-logo h2{font-size:17px;font-weight:600}
+.login-logo p{font-size:12px;color:var(--text3);margin-top:3px}
+.login-error{background:var(--red-light);color:var(--red);font-size:12px;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid #f5c4c4;text-align:center}
+
+/* ── WEEK TAG ── */
+.week-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;background:var(--accent-light);color:var(--accent-text);margin-right:6px}
+
+/* ── ADD SECTION INLINE ── */
+.add-section-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg)}
+.add-section-row input{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
+.add-section-row input:focus{border-color:var(--accent)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     LOGIN / ADMIN PANEL — rendered by JS
+════════════════════════════════════════════ -->
+<div id="root"></div>
+
+<script>
+/* ══════════════════════════════════════
+   CONFIGURACIÓN — edita aquí
+══════════════════════════════════════ */
+const ADMIN_PASSWORD = "urgenciaUA2026"; // ← cambia esto
+const APP_TITLE      = "Internado Urgencia · MDCMD8";
+const APP_SUB        = "Universidad de Antofagasta";
+const STORAGE_KEY    = "mdcmd8_v2";
+
+/* ══════════════════════════════════════
+   DATOS INICIALES (semanas del programa)
+══════════════════════════════════════ */
+const WEEK_DEFS = [
+  {id:"s1",  short:"S1",  label:"Semana 1",  title:"Generalidades"},
+  {id:"s2",  short:"S2",  label:"Semana 2",  title:"Paciente crítico y reanimación"},
+  {id:"s3",  short:"S3",  label:"Semana 3",  title:"Dolor torácico"},
+  {id:"s4",  short:"S4",  label:"Semana 4",  title:"Disnea"},
+  {id:"s5",  short:"S5",  label:"Semana 5",  title:"Dolor abdominal y lumbar"},
+  {id:"s6",  short:"S6",  label:"Semana 6",  title:"Paciente neurológico agudo"},
+  {id:"s7",  short:"S7",  label:"Semana 7",  title:"Trauma"},
+  {id:"s8",  short:"S8",  label:"Semana 8",  title:"Infecciones frecuentes"},
+  {id:"s9",  short:"S9",  label:"Semana 9",  title:"Urgencias endocrino-metabólicas"},
+  {id:"s10", short:"S10", label:"Semana 10", title:"Patología frecuente en urgencia"},
+  {id:"s11", short:"S11", label:"Semana 11", title:"Comunicación y aspectos médico-legales"},
+  {id:"s12", short:"S12", label:"Semana 12", title:"Examen final — Mini-ECOE"},
+];
+const EXTRA_MODULES = [
+  {id:"ecoe",  icon:"ti-clipboard-list", label:"Mini-ECOE"},
+  {id:"sim",   icon:"ti-activity",       label:"Simulación clínica"},
+  {id:"procs", icon:"ti-stethoscope",    label:"Procedimientos"},
+  {id:"biblio",icon:"ti-books",          label:"Bibliografía general"},
+];
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let S = {
+  isAdmin: false,
+  view: "home",
+  weeksOpen: true,
+  sectionsOpen: {},
+  driveUrl: "",
+  modules: {},   // id → { sections: [{id,name,resources:[{id,name,desc,url,type}]}] }
+  modal: null,
+  addTab: "link",
+  searchTerm: "",
+  addSectionShowing: false,
+};
+
+function initModules(){
+  const ids = ["home","ecoe","sim","procs","biblio",...WEEK_DEFS.map(w=>w.id)];
+  ids.forEach(id=>{ if(!S.modules[id]) S.modules[id]={sections:[]}; });
+}
+
+/* ── persistence ── */
+function persist(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({modules:S.modules,driveUrl:S.driveUrl,sectionsOpen:S.sectionsOpen})); }catch(e){}
+}
+function hydrate(){
+  try{
+    const d = localStorage.getItem(STORAGE_KEY);
+    if(d){
+      const p = JSON.parse(d);
+      S.modules      = p.modules      || {};
+      S.driveUrl     = p.driveUrl     || "";
+      S.sectionsOpen = p.sectionsOpen || {};
+    }
+  }catch(e){}
+}
+
+/* ── uid ── */
+function uid(){ return Math.random().toString(36).slice(2,9); }
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function getViewLabel(){
+  if(S.view==="home") return "Inicio";
+  const w = WEEK_DEFS.find(x=>x.id===S.view);
+  if(w) return w.label+" — "+w.title;
+  const e = EXTRA_MODULES.find(x=>x.id===S.view);
+  if(e) return e.label;
+  return "";
+}
+function totalResources(){
+  return Object.values(S.modules).reduce((a,m)=>a+m.sections.reduce((b,s)=>b+s.resources.length,0),0);
+}
+function totalSections(){
+  return Object.values(S.modules).reduce((a,m)=>a+m.sections.length,0);
+}
+function modCount(id){
+  return (S.modules[id]?.sections||[]).reduce((a,s)=>a+s.resources.length,0);
+}
+function tagClass(t){
+  return {pdf:"tag-pdf",ppt:"tag-ppt",link:"tag-link",video:"tag-video",doc:"tag-doc"}[t]||"tag-otro";
+}
+function typeIcon(t){
+  return {pdf:"ti-file-type-pdf",ppt:"ti-presentation",link:"ti-link",video:"ti-brand-youtube",doc:"ti-file-text",otro:"ti-file"}[t]||"ti-file";
+}
+function typeLabel(t){
+  return {pdf:"PDF",ppt:"PPT",link:"LINK",video:"VIDEO",doc:"DOC",otro:"OTRO"}[t]||"ARCH";
+}
+
+/* ══════════════════════════════════════
+   RENDER
+══════════════════════════════════════ */
+function render(){
+  const root = document.getElementById("root");
+  if(!S.isAdmin && S.view==="login"){
+    root.innerHTML = renderLogin();
+    return;
+  }
+  root.innerHTML = `
+    <div class="layout">
+      ${renderSidebar()}
+      <div class="main">
+        ${renderTopbar()}
+        <div class="content">${renderContent()}</div>
+      </div>
+    </div>
+    ${S.modal ? renderModal() : ""}
+  `;
+  bindEvents();
+}
+
+/* ── LOGIN ── */
+function renderLogin(){
+  return `
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="badge">MDCMD8</div>
+        <h2>${APP_TITLE}</h2>
+        <p>${APP_SUB}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        ${S.loginError?`<div class="login-error"><i class="ti ti-alert-circle"></i> Contraseña incorrecta</div>`:""}
+        <div class="form-group">
+          <label>Contraseña de administrador</label>
+          <input type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')tryLogin()"/>
+        </div>
+        <button class="btn primary" onclick="tryLogin()" style="width:100%;justify-content:center">
+          <i class="ti ti-lock-open"></i> Entrar como administrador
+        </button>
+        <div style="text-align:center;margin-top:4px">
+          <span style="font-size:12px;color:var(--text3)">¿Solo quieres ver los recursos?</span>
+          <button onclick="enterVisitor()" style="border:none;background:none;font-size:12px;color:var(--accent);cursor:pointer;margin-left:4px;text-decoration:underline">Ver como visitante</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── SIDEBAR ── */
+function renderSidebar(){
+  const footer = S.isAdmin
+    ? `<div class="admin-badge"><i class="ti ti-shield-check" style="font-size:16px"></i> Modo administrador <button class="badge-btn" onclick="logout()">Salir</button></div>`
+    : `<div class="visitor-badge"><i class="ti ti-eye" style="font-size:16px"></i> Modo visitante <button class="badge-btn" onclick="showLoginModal()">Admin</button></div>`;
+
+  let weeks = "";
+  if(S.weeksOpen){
+    weeks = WEEK_DEFS.map(w=>{
+      const cnt = modCount(w.id);
+      return `<div class="week-child ${S.view===w.id?"active":""}" onclick="setView('${w.id}')">
+        <i class="ti ti-book" style="font-size:13px"></i>
+        <span style="flex:1">${w.label}</span>
+        ${cnt?`<span class="week-count">${cnt}</span>`:""}
+      </div>`;
+    }).join("");
+  }
+
+  const extras = EXTRA_MODULES.map(m=>{
+    const cnt = modCount(m.id);
+    return `<div class="nav-item ${S.view===m.id?"active":""}" onclick="setView('${m.id}')">
+      <i class="ti ${m.icon}"></i>
+      <span style="flex:1">${m.label}</span>
+      ${cnt?`<span class="nav-count">${cnt}</span>`:""}
+    </div>`;
+  }).join("");
+
+  return `
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-badge">MDCMD8</div>
+      <div class="brand-title">${APP_TITLE}</div>
+      <div class="brand-sub">${APP_SUB} · 2026</div>
+    </div>
+    <div class="sidebar-search">
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Buscar recursos..." value="${S.searchTerm}" oninput="doSearch(this.value)"/>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group-label">General</div>
+      <div class="nav-item ${S.view==="home"?"active":""}" onclick="setView('home')">
+        <i class="ti ti-home"></i><span style="flex:1">Inicio</span>
+        ${modCount("home")?`<span class="nav-count">${modCount("home")}</span>`:""}
+      </div>
+      <div class="nav-group-label" style="margin-top:6px">Semanas clínicas</div>
+      <button class="week-group-toggle ${S.weeksOpen?"open":""}" onclick="S.weeksOpen=!S.weeksOpen;render()">
+        <i class="ti ti-calendar"></i> 12 semanas
+        <i class="ti ti-chevron-down chevron"></i>
+      </button>
+      <div class="week-children">${weeks}</div>
+      <div class="nav-group-label" style="margin-top:6px">Módulos especiales</div>
+      ${extras}
+      ${S.isAdmin?`
+      <div class="nav-group-label" style="margin-top:6px">Administración</div>
+      <div class="nav-item" onclick="showDriveConfig()">
+        <i class="ti ti-brand-google-drive"></i> Google Drive
+      </div>`:""}
+    </div>
+    <div class="sidebar-footer">${footer}</div>
+  </div>`;
+}
+
+/* ── TOPBAR ── */
+function renderTopbar(){
+  const adminBtns = S.isAdmin ? `
+    <button class="btn" onclick="showAddSection()"><i class="ti ti-folder-plus"></i> Sección</button>
+    <button class="btn primary" onclick="showAddResource()"><i class="ti ti-plus"></i> Recurso</button>
+  ` : "";
+  return `
+  <div class="topbar">
+    <div class="topbar-title">${getViewLabel()}</div>
+    <div class="topbar-actions">${adminBtns}</div>
+  </div>`;
+}
+
+/* ── CONTENT ── */
+function renderContent(){
+  if(S.searchTerm) return renderSearch();
+  const mod = S.modules[S.view];
+  if(!mod) return `<div class="empty-state"><i class="ti ti-alert-circle"></i><p>Vista no encontrada</p></div>`;
+
+  let html = "";
+
+  if(S.view==="home"){
+    html += `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">${totalResources()}</div><div class="stat-lbl">Recursos totales</div></div>
+      <div class="stat-card"><div class="stat-num">${totalSections()}</div><div class="stat-lbl">Secciones</div></div>
+      <div class="stat-card"><div class="stat-num">12</div><div class="stat-lbl">Semanas clínicas</div></div>
+      <div class="stat-card"><div class="stat-num">${EXTRA_MODULES.length}</div><div class="stat-lbl">Módulos especiales</div></div>
+    </div>`;
+    if(S.driveUrl){
+      html += `<div class="drive-banner" onclick="window.open('${S.driveUrl}','_blank')">
+        <div class="drive-icon"><i class="ti ti-brand-google-drive"></i></div>
+        <div style="min-width:0">
+          <div class="drive-title">Carpeta Google Drive del internado</div>
+          <div class="drive-url">${S.driveUrl}</div>
+        </div>
+        <i class="ti ti-external-link" style="color:var(--text3);font-size:16px;flex-shrink:0"></i>
+      </div>`;
+    } else if(S.isAdmin){
+      html += `<div class="drive-banner" onclick="showDriveConfig()">
+        <div class="drive-icon" style="background:var(--surface2)"><i class="ti ti-brand-google-drive" style="color:var(--text3)"></i></div>
+        <div><div class="drive-title" style="color:var(--text2)">Conectar carpeta de Google Drive</div>
+        <div class="drive-url">Haz clic para agregar el link de tu carpeta compartida</div></div>
+        <i class="ti ti-arrow-right" style="color:var(--text3);font-size:16px;flex-shrink:0;margin-left:auto"></i>
+      </div>`;
+    }
+  } else {
+    const w = WEEK_DEFS.find(x=>x.id===S.view);
+    if(w) html += `<div style="margin-bottom:16px;display:flex;align-items:center;gap:8px">
+      <span class="week-tag">${w.short}</span>
+      <span style="font-size:13px;color:var(--text2)">${w.title}</span>
+    </div>`;
+  }
+
+  if(mod.sections.length===0){
+    html += `<div class="empty-state">
+      <i class="ti ti-folder-open"></i>
+      <p>${S.isAdmin?"Sin secciones aún. Crea una sección con el botón superior derecho.":"Sin recursos publicados en esta sección aún."}</p>
+    </div>`;
+  } else {
+    html += mod.sections.map((sec,si)=>renderSection(sec,si,S.view,mod.sections.length)).join("");
+  }
+  return html;
+}
+
+function renderSearch(){
+  const term = S.searchTerm.toLowerCase();
+  let results = [];
+  Object.entries(S.modules).forEach(([modId,mod])=>{
+    mod.sections.forEach(sec=>{
+      sec.resources.forEach(r=>{
+        if(r.name.toLowerCase().includes(term)||r.desc?.toLowerCase().includes(term)){
+          results.push({modId,secName:sec.name,r});
+        }
+      });
+    });
+  });
+  if(!results.length) return `<div class="empty-state"><i class="ti ti-search-off"></i><p>Sin resultados para "<strong>${S.searchTerm}</strong>"</p></div>`;
+  return `<div style="margin-bottom:12px;font-size:13px;color:var(--text2)">${results.length} resultado${results.length!==1?"s":""} para "<strong>${S.searchTerm}</strong>"</div>`
+    + `<div class="section-block"><div class="section-body">`
+    + results.map(({modId,secName,r})=>{
+        const w = WEEK_DEFS.find(x=>x.id===modId);
+        const e = EXTRA_MODULES.find(x=>x.id===modId);
+        const ctx = w?w.label:e?e.label:"General";
+        return renderResourceRowHTML(r,0,0,"search","_",1,false,`${ctx} › ${secName}`);
+      }).join("")
+    + `</div></div>`;
+}
+
+function renderSection(sec,si,viewId,total){
+  const isOpen = S.sectionsOpen[sec.id] !== false;
+  const adminActions = S.isAdmin ? `
+    <div class="section-admin-actions">
+      ${si>0?`<button class="icon-btn" title="Subir" onclick="event.stopPropagation();moveSection('${viewId}',${si},-1)"><i class="ti ti-arrow-up"></i></button>`:""}
+      ${si<total-1?`<button class="icon-btn" title="Bajar" onclick="event.stopPropagation();moveSection('${viewId}',${si},1)"><i class="ti ti-arrow-down"></i></button>`:""}
+      <button class="icon-btn" title="Renombrar" onclick="event.stopPropagation();renameSection('${viewId}','${sec.id}')"><i class="ti ti-edit"></i></button>
+      <button class="icon-btn red" title="Eliminar" onclick="event.stopPropagation();deleteSection('${viewId}','${sec.id}')"><i class="ti ti-trash"></i></button>
+    </div>` : "";
+  const body = isOpen ? `
+    <div class="section-body">
+      ${sec.resources.length===0
+        ? `<div class="empty-state" style="padding:20px"><i class="ti ti-inbox" style="font-size:24px"></i><p>Sin recursos en esta sección</p></div>`
+        : sec.resources.map((r,ri)=>renderResourceRowHTML(r,ri,sec.resources.length,viewId,sec.id,total,S.isAdmin,null)).join("")
+      }
+      ${S.isAdmin?`<div style="padding:8px 14px;border-top:${sec.resources.length?'1px solid var(--border)':'none'}">
+        <button class="btn" style="font-size:12px;padding:5px 10px" onclick="showAddResource('${sec.id}')"><i class="ti ti-plus"></i> Agregar recurso</button>
+      </div>`:""}
+    </div>` : "";
+  return `
+  <div class="section-block">
+    <div class="section-header" onclick="toggleSection('${sec.id}')">
+      ${S.isAdmin?`<span class="section-handle" onclick="event.stopPropagation()"><i class="ti ti-grip-vertical"></i></span>`:""}
+      <i class="ti ti-folder section-icon"></i>
+      <span class="section-name">${sec.name}</span>
+      <span class="section-meta">${sec.resources.length} recurso${sec.resources.length!==1?"s":""}</span>
+      ${adminActions}
+      <i class="ti ti-chevron-down section-chevron ${isOpen?"open":""}"></i>
+    </div>
+    ${body}
+  </div>`;
+}
+
+function renderResourceRowHTML(r,ri,total,viewId,secId,secTotal,isAdmin,ctxLabel){
+  const adminActions = isAdmin ? `
+    ${ri>0?`<button class="icon-btn" title="Subir" onclick="moveResource('${viewId}','${secId}',${ri},-1)"><i class="ti ti-arrow-up"></i></button>`:""}
+    ${ri<total-1?`<button class="icon-btn" title="Bajar" onclick="moveResource('${viewId}','${secId}',${ri},1)"><i class="ti ti-arrow-down"></i></button>`:""}
+    <button class="icon-btn blue" title="Editar" onclick="editResource('${viewId}','${secId}','${r.id}')"><i class="ti ti-edit"></i></button>
+    <button class="icon-btn red" title="Eliminar" onclick="deleteResource('${viewId}','${secId}','${r.id}')"><i class="ti ti-trash"></i></button>
+  ` : "";
+  const downloadBtn = r.url ? `<a href="${r.url}" target="_blank" class="icon-btn blue" title="${r.type==='link'?'Abrir enlace':'Abrir / descargar'}" download><i class="ti ${r.type==='link'?'ti-external-link':'ti-download'}"></i></a>` : "";
+  return `
+  <div class="resource-row">
+    ${isAdmin?`<span class="res-handle"><i class="ti ti-grip-vertical"></i></span>`:""}
+    <i class="ti ${typeIcon(r.type)} res-type-icon" style="color:${typeColor(r.type)}"></i>
+    <div class="res-info">
+      <div class="res-name">${r.name}</div>
+      ${ctxLabel?`<div class="res-desc">${ctxLabel}</div>`:r.desc?`<div class="res-desc">${r.desc}</div>`:""}
+    </div>
+    <span class="res-tag ${tagClass(r.type)}">${typeLabel(r.type)}</span>
+    ${r.driveLinked?`<i class="ti ti-brand-google-drive" style="font-size:15px;color:var(--accent);flex-shrink:0" title="Archivo en Drive"></i>`:""}
+    <div class="res-actions">
+      ${downloadBtn}
+      ${adminActions}
+    </div>
+  </div>`;
+}
+
+function typeColor(t){
+  return {pdf:"#8a1a1a",ppt:"#7a5000",link:"#1a4f8a",video:"#4a1a7a",doc:"#1a6b3c",otro:"#6b6860"}[t]||"#6b6860";
+}
+
+/* ══════════════════════════════════════
+   MODALS
+══════════════════════════════════════ */
+function renderModal(){
+  return `<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">${S.modal}</div>`;
+}
+
+function showModal(html){ S.modal=html; render(); }
+function closeModal(){ S.modal=null; render(); }
+function handleOverlayClick(e){ if(e.target.id==="modal-overlay") closeModal(); }
+
+/* login modal (for visitor→admin) */
+function showLoginModal(){
+  showModal(`
+    <div class="modal">
+      <div class="modal-header"><h3>Acceso administrador</h3><button class="icon-btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+      <div class="modal-body">
+        ${S.loginError?`<div class="login-error">Contraseña incorrecta</div>`:""}
+        <div class="form-group"><label>Contraseña</label><input type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')tryLogin()"/></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn primary" onclick="tryLogin()"><i class="ti ti-lock-open"></i> Entrar</button>
+      </div>
+    </div>`);
+  setTimeout(()=>document.getElementById("pw-input")?.focus(),50);
+}
+
+/* add section */
+function showAddSection(){
+  showModal(`
+    <div class="modal">
+      <div class="modal-header"><h3>Nueva sección</h3><button class="icon-btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nombre de la sección</label>
+          <input id="sec-name" placeholder="Ej: Clases teóricas, Papers, Guías clínicas..." onkeydown="if(event.key==='Enter')addSection()"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn primary" onclick="addSection()"><i class="ti ti-check"></i> Crear</button>
+      </div>
+    </div>`);
+  setTimeout(()=>document.getElementById("sec-name")?.focus(),50);
+}
+
+/* add resource */
+function showAddResource(preSecId){
+  const mod = S.modules[S.view];
+  const secOpts = mod.sections.map(s=>`<option value="${s.id}" ${s.id===preSecId?"selected":""}>${s.name}</option>`).join("");
+  S.addTab = "link";
+  showModal(`
+    <div class="modal">
+      <div class="modal-header"><h3>Agregar recurso</h3><button class="icon-btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+      <div class="modal-body">
+        <div class="tab-strip">
+          <button class="tab-btn active" id="tab-link" onclick="switchTab('link')"><i class="ti ti-link"></i> Link / URL</button>
+          <button class="tab-btn" id="tab-drive" onclick="switchTab('drive')"><i class="ti ti-brand-google-drive"></i> Google Drive</button>
+          <button class="tab-btn" id="tab-file" onclick="switchTab('file')"><i class="ti ti-file"></i> Archivo</button>
+        </div>
+
+        <div id="panel-link">
+          <div class="form-group"><label>Nombre del recurso *</label><input id="l-name" placeholder="Ej: Guía ACLS 2024"/></div>
+          <div class="form-group"><label>URL *</label><input id="l-url" placeholder="https://..."/></div>
+          <div class="form-group"><label>Tipo</label>
+            <select id="l-type"><option value="link">Enlace web</option><option value="pdf">PDF</option><option value="video">Video</option><option value="ppt">Presentación</option><option value="doc">Documento</option></select>
+          </div>
+          <div class="form-group"><label>Descripción (opcional)</label><input id="l-desc" placeholder="Breve descripción del recurso"/></div>
+        </div>
+
+        <div id="panel-drive" style="display:none">
+          <div class="info-box"><i class="ti ti-info-circle"></i>Sube el archivo a tu carpeta de Drive, copia el link de "Compartir" y pégalo aquí.</div>
+          <div class="form-group" style="margin-top:4px"><label>Nombre del recurso *</label><input id="d-name" placeholder="Ej: PPT Semana 2 — Vía aérea"/></div>
+          <div class="form-group"><label>Link de Google Drive *</label><input id="d-url" placeholder="https://drive.google.com/file/d/..."/></div>
+          <div class="form-group"><label>Tipo de archivo</label>
+            <select id="d-type"><option value="pdf">PDF</option><option value="ppt">Presentación (PPT)</option><option value="doc">Documento</option><option value="video">Video</option><option value="otro">Otro</option></select>
+          </div>
+          <div class="form-group"><label>Descripción (opcional)</label><input id="d-desc" placeholder="Breve descripción"/></div>
+        </div>
+
+        <div id="panel-file" style="display:none">
+          <div class="info-box"><i class="ti ti-alert-circle"></i>Los archivos locales no se pueden hospedar directamente en HTML. Súbelos a Google Drive y usa la pestaña "Google Drive" para agregar el link.</div>
+          <div style="margin-top:8px">
+            <button class="btn success" onclick="switchTab('drive')"><i class="ti ti-brand-google-drive"></i> Ir a pestaña Drive</button>
+          </div>
+        </div>
+
+        ${mod.sections.length===0
+          ? `<div class="info-box"><i class="ti ti-folder-plus"></i>No hay secciones. Se creará una sección "General" automáticamente.</div>`
+          : `<div class="form-group"><label>Sección</label><select id="r-sec">${secOpts}</select></div>`
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn primary" onclick="addResource()"><i class="ti ti-check"></i> Agregar</button>
+      </div>
+    </div>`);
+  setTimeout(()=>document.getElementById("l-name")?.focus(),50);
+}
+
+/* edit resource */
+function editResource(viewId,secId,rId){
+  const sec = S.modules[viewId].sections.find(s=>s.id===secId);
+  const r = sec?.resources.find(x=>x.id===rId);
+  if(!r) return;
+  showModal(`
+    <div class="modal">
+      <div class="modal-header"><h3>Editar recurso</h3><button class="icon-btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+      <div class="modal-body">
+        <div class="form-group"><label>Nombre *</label><input id="e-name" value="${r.name}"/></div>
+        <div class="form-group"><label>URL / Link</label><input id="e-url" value="${r.url||''}"/></div>
+        <div class="form-group"><label>Tipo</label>
+          <select id="e-type">
+            ${["link","pdf","ppt","video","doc","otro"].map(t=>`<option value="${t}" ${r.type===t?"selected":""}>${typeLabel(t)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="form-group"><label>Descripción</label><input id="e-desc" value="${r.desc||''}"/></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn primary" onclick="saveEdit('${viewId}','${secId}','${rId}')"><i class="ti ti-check"></i> Guardar</button>
+      </div>
+    </div>`);
+  setTimeout(()=>document.getElementById("e-name")?.focus(),50);
+}
+
+/* drive config */
+function showDriveConfig(){
+  showModal(`
+    <div class="modal">
+      <div class="modal-header"><h3>Configurar Google Drive</h3><button class="icon-btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+      <div class="modal-body">
+        <div class="info-box"><i class="ti ti-brand-google-drive"></i>
+          Pega el link de tu carpeta compartida de Google Drive. Aparecerá en el inicio y los visitantes podrán acceder a los archivos desde ahí.
+        </div>
+        <div class="form-group"><label>URL de la carpeta Google Drive</label>
+          <input id="drive-url" value="${S.driveUrl}" placeholder="https://drive.google.com/drive/folders/..."/>
+        </div>
+        <p class="form-hint">Asegúrate de que la carpeta esté configurada como "Cualquier persona con el enlace puede ver".</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn primary" onclick="saveDrive()"><i class="ti ti-check"></i> Guardar</button>
+      </div>
+    </div>`);
+  setTimeout(()=>document.getElementById("drive-url")?.focus(),50);
+}
+
+/* ══════════════════════════════════════
+   ACTIONS
+══════════════════════════════════════ */
+function tryLogin(){
+  const pw = document.getElementById("pw-input")?.value||"";
+  if(pw===ADMIN_PASSWORD){
+    S.isAdmin=true; S.loginError=false; S.view="home"; S.modal=null; render();
+  } else {
+    S.loginError=true; render();
+    setTimeout(()=>document.getElementById("pw-input")?.focus(),50);
+  }
+}
+function logout(){ S.isAdmin=false; render(); }
+function enterVisitor(){ S.loginError=false; S.view="home"; render(); }
+
+function setView(v){ S.view=v; S.searchTerm=""; render(); }
+function toggleSection(id){ S.sectionsOpen[id] = S.sectionsOpen[id]===false ? true : false; persist(); render(); }
+
+function doSearch(val){ S.searchTerm=val; render(); }
+
+function switchTab(t){
+  ["link","drive","file"].forEach(x=>{
+    document.getElementById("panel-"+x).style.display = x===t?"":"none";
+    document.getElementById("tab-"+x).className = "tab-btn"+(x===t?" active":"");
+  });
+  S.addTab=t;
+}
+
+function addSection(){
+  const name = document.getElementById("sec-name")?.value?.trim();
+  if(!name){alert("Ingresa un nombre");return;}
+  const sec = {id:uid(),name,resources:[]};
+  S.modules[S.view].sections.push(sec);
+  S.sectionsOpen[sec.id]=true;
+  persist(); closeModal();
+}
+
+function renameSection(viewId,secId){
+  const sec = S.modules[viewId].sections.find(s=>s.id===secId);
+  if(!sec) return;
+  const name = prompt("Nuevo nombre:",sec.name);
+  if(name?.trim()){sec.name=name.trim();persist();render();}
+}
+function deleteSection(viewId,secId){
+  if(!confirm("¿Eliminar esta sección y todos sus recursos?")) return;
+  S.modules[viewId].sections = S.modules[viewId].sections.filter(s=>s.id!==secId);
+  persist(); render();
+}
+function moveSection(viewId,idx,dir){
+  const secs = S.modules[viewId].sections;
+  const ni=idx+dir;
+  if(ni<0||ni>=secs.length)return;
+  [secs[idx],secs[ni]]=[secs[ni],secs[idx]];
+  persist();render();
+}
+
+function addResource(){
+  const t = S.addTab;
+  let name,url,type,desc,isDrive=false;
+  if(t==="link"){
+    name = document.getElementById("l-name")?.value?.trim();
+    url  = document.getElementById("l-url")?.value?.trim();
+    type = document.getElementById("l-type")?.value||"link";
+    desc = document.getElementById("l-desc")?.value?.trim();
+  } else if(t==="drive"){
+    name    = document.getElementById("d-name")?.value?.trim();
+    url     = document.getElementById("d-url")?.value?.trim();
+    type    = document.getElementById("d-type")?.value||"pdf";
+    desc    = document.getElementById("d-desc")?.value?.trim();
+    isDrive = true;
+  } else { return; }
+  if(!name){alert("El nombre es obligatorio");return;}
+  const mod = S.modules[S.view];
+  let secId = document.getElementById("r-sec")?.value;
+  if(!secId||!mod.sections.find(s=>s.id===secId)){
+    const sec={id:uid(),name:"General",resources:[]};
+    mod.sections.push(sec);
+    S.sectionsOpen[sec.id]=true;
+    secId=sec.id;
+  }
+  const sec = mod.sections.find(s=>s.id===secId);
+  sec.resources.push({id:uid(),name,url:url||"",type,desc:desc||"",driveLinked:isDrive});
+  persist(); closeModal();
+}
+
+function saveEdit(viewId,secId,rId){
+  const sec = S.modules[viewId].sections.find(s=>s.id===secId);
+  const r   = sec?.resources.find(x=>x.id===rId);
+  if(!r) return;
+  const name = document.getElementById("e-name")?.value?.trim();
+  if(!name){alert("El nombre es obligatorio");return;}
+  r.name = name;
+  r.url  = document.getElementById("e-url")?.value?.trim()||"";
+  r.type = document.getElementById("e-type")?.value||r.type;
+  r.desc = document.getElementById("e-desc")?.value?.trim()||"";
+  persist(); closeModal();
+}
+
+function deleteResource(viewId,secId,rId){
+  if(!confirm("¿Eliminar este recurso?")) return;
+  const sec = S.modules[viewId].sections.find(s=>s.id===secId);
+  if(sec) sec.resources = sec.resources.filter(r=>r.id!==rId);
+  persist(); render();
+}
+function moveResource(viewId,secId,idx,dir){
+  const sec = S.modules[viewId].sections.find(s=>s.id===secId);
+  if(!sec)return;
+  const ni=idx+dir;
+  if(ni<0||ni>=sec.resources.length)return;
+  [sec.resources[idx],sec.resources[ni]]=[sec.resources[ni],sec.resources[idx]];
+  persist();render();
+}
+
+function saveDrive(){
+  S.driveUrl = document.getElementById("drive-url")?.value?.trim()||"";
+  persist(); closeModal();
+}
+
+function bindEvents(){}
+
+/* ══════════════════════════════════════
+   BOOT
+══════════════════════════════════════ */
+hydrate();
+initModules();
+// First visit: go to login screen for admin, but allow visitor access directly
+S.view = "home";
+render();
+</script>
+</body>
+</html>
